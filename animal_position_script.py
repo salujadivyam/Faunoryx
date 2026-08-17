@@ -77,6 +77,10 @@ class Animal:
         self.flagged=True if stillmins>flag*60 else False
         return self.flagged
 
+        
+    #if the tiger seems to move faster than its normal speed, there's a chance it could be in a vehicle that belongs to a poacher
+    def speed_anomaly(self,newlat,newlon,time,TOP_SPEED=65):
+        return GeoUtils.movement_speed(self.lat,newlat,self.lon,newlon,time)>TOP_SPEED
     
         
         
