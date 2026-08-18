@@ -77,10 +77,38 @@ class Animal:
         self.flagged=True if stillmins>flag*60 else False
         return self.flagged
 
-        
+
+    def excursion(self): #checks if tiger is inside the boundary after every tick
+        return not GeoUtils.insideboundary(self.lat,self.lon,self.boundary)
+
+
     #if the tiger seems to move faster than its normal speed, there's a chance it could be in a vehicle that belongs to a poacher
     def speed_anomaly(self,newlat,newlon,time,TOP_SPEED=65):
         return GeoUtils.movement_speed(self.lat,newlat,self.lon,newlon,time)>TOP_SPEED
+
+
+    #one full cycle, one animal one time step, for 1800 seconds and 30 minutes
+    def tick(self,stepmax=0.5,tick_mins=30,flag=12,TOP_SPEED=65):
+        newlat,newlon=GeoUtils.move(self.lat,self.lon,stepmax=0.5)  #gets new position
+        moved=(newlat!=self.lat)or(newlon!=self.lon) #to check if the animal has moved or not
+        still=self.stillness(moved,tick_mins,flag)         #checks for animal stillness
+        speed=GeoUtils.movement_speed(self.lat,newlat,self.lon,newlon,time=60*tick_mins)    #calculates the speed here, we used 60*tick_mins as 
+        fast=self.speed_anomaly(newlat,newlon,time=60*tick_mins,topspeed=65)    #checks if the movement is faster than the topspeed or not
+
+        #now updating the latitute and longitute 
+        newlat,newlon=self.lat,self.lon
+        outside=self.excursion()   #calling check boundary function
+        ping={
+            "animal_id":self.animalid,
+            "timestamp":datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'),  #converted to ist
+            "lat":self.lat,                           
+            "lon":self.lon,
+            "speedkmph":speed,
+            "still":still,
+            "speed_anomaly":fast,
+            "outside_boundary":outside
+        }
+        return ping                #created a ping dictionary, sends back to caller, readies for event hubs push
     
         
         
