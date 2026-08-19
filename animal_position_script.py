@@ -109,6 +109,13 @@ class Animal:
             "outside_boundary":outside
         }
         return ping                #created a ping dictionary, sends back to caller, readies for event hubs push
+
     
-        
-        
+    @staticmethod
+    def ptinboundary(boundary):
+        minx,miny,maxx,maxy=boundary.bounds        
+        while True:
+            lon=rd.uniform(minx,maxx)             #creates random coordinates 
+            lat=rd.uniform(miny,maxy)
+            if boundary.contains(Point(lon,lat)):   #generates only when the points are within the boundary
+                return lat,lon
