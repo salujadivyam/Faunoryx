@@ -7,6 +7,7 @@ from turtle import shape #polygons
 import uuid
 from datetime import datetime, timezone #need these to track and maintain a record
 from shapely.geometry import Point #to create a boundary for the nagarahole geojson
+from azure.eventhub import EventHubProducerClient
 
 geojson=r"D:\Faunoryx\Faunoryx\Nagarahole Map.geojson"
 
@@ -146,3 +147,10 @@ class Animal:
                 tigerid+=1
                 count+=1
         return tigers
+
+#now need a new class for telemetry
+class TelemetryPublisher:
+    def __init__(self,conn_str,eventhub_name):
+        self.conn_str=conn_str
+        self.eventhub_name=eventhub_name
+        self.producer=EventHubProducerClient.from_connection_string(conn_str=conn_str, eventhub_name=eventhub_name)
