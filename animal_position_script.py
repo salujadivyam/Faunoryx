@@ -163,3 +163,6 @@ class TelemetryPublisher:
             event_data=EventData(newping)               #makes it as Azure compatible object 
             batch.add(event_data)           #puts wrapped event inside container
             self.producer.send_batch(batch)      #pushes to cloud
+
+    def close(self):
+            self.producer.close()
