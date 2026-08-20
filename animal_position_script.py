@@ -119,3 +119,30 @@ class Animal:
             lat=rd.uniform(miny,maxy)
             if boundary.contains(Point(lon,lat)):   #generates only when the points are within the boundary
                 return lat,lon
+            
+
+    def spawntigers(boundary,total=149):
+        count=0          #initial count starts at 0
+        tigers=[]
+        tigerid=1       #the tiger id starts from 1
+        while count<total:      #ensures count does not exceeds total number of tigers
+            rem=total-count
+            r=rd.random()
+            if r<0.9:        #70% of tigers tend to stay solitary
+                size=1
+            elif r<0.08:      #20% chance that a tiger may be mating
+                size=rd.randint(2,3)
+            else:
+                size=rd.randint((4,min(rem,6)))   #a very small chance for a tiger to be in an ambush or a group
+            size=min(rem,size)
+
+            centre_lat,centre_lon=Animal.ptinboundary(boundary)                 #assigning the random coordinate to a tiger
+            for i in range(size):
+                jitter_lat=centre_lat+rd.uniform(0.01,-0.01)
+                jitter_lon=centre_lon+rd.uniform(0.01,-0.01)                #the coordinates can vary by ±0.01
+                if not boundary.contains(Point(jitter_lon,jitter_lat)):     #if the jitter points lie outside the boundary, they are reverted back the the original
+                    jitter_lon,jitter_lat=centre_lon,centre_lat
+                tigers.append(Animal(f"T{tigerid:03}:",jitter_lat,jitter_lon,boundary))  #adds in the tiger list, the tiger id and the coordinates
+                tigerid+=1
+                count+=1
+        return tigers
