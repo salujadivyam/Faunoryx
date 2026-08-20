@@ -8,6 +8,7 @@ import uuid
 from datetime import datetime, timezone #need these to track and maintain a record
 from shapely.geometry import Point #to create a boundary for the nagarahole geojson
 from azure.eventhub import EventHubProducerClient
+from azure.eventhub import EventData
 
 geojson=r"D:\Faunoryx\Faunoryx\Nagarahole Map.geojson"
 
@@ -154,3 +155,11 @@ class TelemetryPublisher:
         self.conn_str=conn_str
         self.eventhub_name=eventhub_name
         self.producer=EventHubProducerClient.from_connection_string(conn_str=conn_str, eventhub_name=eventhub_name)
+
+
+    def push(self,ping):
+            newping=json.dumps(ping)        #converts the dictionary to JSON
+            batch=self.producer.create_batch()  #makes empty batch object
+            event_data=EventData(newping)               #makes it as Azure compatible object 
+            batch.add(event_data)           #puts wrapped event inside container
+            self.producer.send_batch(batch)      #pushes to cloud
