@@ -158,11 +158,22 @@ class TelemetryPublisher:
 
 
     def push(self,ping):
-            newping=json.dumps(ping)        #converts the dictionary to JSON
-            batch=self.producer.create_batch()  #makes empty batch object
-            event_data=EventData(newping)               #makes it as Azure compatible object 
-            batch.add(event_data)           #puts wrapped event inside container
-            self.producer.send_batch(batch)      #pushes to cloud
+        newping=json.dumps(ping)        #converts the dictionary to JSON
+        batch=self.producer.create_batch()  #makes empty batch object
+        event_data=EventData(newping)               #makes it as Azure compatible object 
+        batch.add(event_data)           #puts wrapped event inside container
+        self.producer.send_batch(batch)      #pushes to cloud
 
     def close(self):
-            self.producer.close()
+        self.producer.close()
+
+
+class Simulator:
+    def __init__(self,boundary,publisher,tick=1800):     #stores shared stuff like boundary publisher and tick rate
+        self.boundary=boundary
+        self.publisher=publisher
+        self.tick=tick
+        self.animals=[]
+
+    def addtiger(self,animal):
+        self.animals.append(animal)         #sim needs a list of tigers to manage, this adds them one by one, registers tigers into sim
