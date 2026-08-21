@@ -177,3 +177,11 @@ class Simulator:
 
     def addtiger(self,animal):
         self.animals.append(animal)         #sim needs a list of tigers to manage, this adds them one by one, registers tigers into sim
+
+
+    def run(self):
+        while True:
+            for animal in self.animals:       #for each tiger in the list
+                ping=animal.tick()             #advance the tiger one step
+                self.publisher.push(ping)        #sends that dictionary to event hub
+            t.sleep(self.tick)                  #waits for next
