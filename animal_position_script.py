@@ -3,10 +3,9 @@ import time as t #to calculate total tick times
 import random as rd #random position of tigers
 import math as mt #used to compute haversine 
 import json #need it to use geojson
-from turtle import shape #polygons
 import uuid
 from datetime import datetime, timezone #need these to track and maintain a record
-from shapely.geometry import Point #to create a boundary for the nagarahole geojson
+from shapely.geometry import shape,Point #to create a boundary for the nagarahole geojson
 from azure.eventhub import EventHubProducerClient
 from azure.eventhub import EventData
 
@@ -55,7 +54,7 @@ class GeoUtils:
 
     #checking if the point of the animal exists within the borders or not
     @staticmethod
-    def insideboundaryI(lat,lon,boundary):
+    def insideboundary(lat,lon,boundary):
         return boundary.contains(Point(lon,lat))  #using shapely here, Point(lon,lan) gives a point and contains will check if it is there in boundry or not
 
 #owns one tiger's behaviour and state
@@ -91,18 +90,18 @@ class Animal:
 
     #one full cycle, one animal one time step, for 1800 seconds and 30 minutes
     def tick(self,stepmax=0.5,tick_mins=30,flag=12,TOP_SPEED=65):
-        newlat,newlon=GeoUtils.move(self.lat,self.lon,stepmax=0.5)  #gets new position
+        newlat,newlon=GeoUtils.move(self.lat,self.lon,stepmax=stepmax)  #gets new position
         moved=(newlat!=self.lat)or(newlon!=self.lon) #to check if the animal has moved or not
         still=self.stillness(moved,tick_mins,flag)         #checks for animal stillness
         speed=GeoUtils.movement_speed(self.lat,newlat,self.lon,newlon,time=60*tick_mins)    #calculates the speed here, we used 60*tick_mins as 
-        fast=self.speed_anomaly(newlat,newlon,time=60*tick_mins,topspeed=65)    #checks if the movement is faster than the topspeed or not
+        fast=self.speed_anomaly(newlat,newlon,time=60*tick_mins,TOP_SPEED=TOP_SPEED)    #checks if the movement is faster than the topspeed or not
 
         #now updating the latitute and longitute 
-        newlat,newlon=self.lat,self.lon
+        self.lat,self.lon=newlat,newlon
         outside=self.excursion()   #calling check boundary function
         ping={
             "animal_id":self.animalid,
-            "timestamp":datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'),  #converted to ist
+            "timestamp":datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'),  #converted to ist
             "lat":self.lat,                           
             "lon":self.lon,
             "speedkmph":speed,
@@ -122,7 +121,7 @@ class Animal:
             if boundary.contains(Point(lon,lat)):   #generates only when the points are within the boundary
                 return lat,lon
             
-
+    @staticmethod
     def spawntigers(boundary,total=149):
         count=0          #initial count starts at 0
         tigers=[]
@@ -130,12 +129,12 @@ class Animal:
         while count<total:      #ensures count does not exceeds total number of tigers
             rem=total-count
             r=rd.random()
-            if r<0.9:        #70% of tigers tend to stay solitary
+            if r<0.9:        #90% of tigers tend to stay solitary
                 size=1
-            elif r<0.08:      #20% chance that a tiger may be mating
+            elif r<0.98:      #8% chance that a tiger may be mating
                 size=rd.randint(2,3)
             else:
-                size=rd.randint((4,min(rem,6)))   #a very small chance for a tiger to be in an ambush or a group
+                size=rd.randint(4,min(rem,6))   #a very small chance for a tiger to be in an ambush or a group
             size=min(rem,size)
 
             centre_lat,centre_lon=Animal.ptinboundary(boundary)                 #assigning the random coordinate to a tiger
@@ -144,7 +143,7 @@ class Animal:
                 jitter_lon=centre_lon+rd.uniform(0.01,-0.01)                #the coordinates can vary by ±0.01
                 if not boundary.contains(Point(jitter_lon,jitter_lat)):     #if the jitter points lie outside the boundary, they are reverted back the the original
                     jitter_lon,jitter_lat=centre_lon,centre_lat
-                tigers.append(Animal(f"T{tigerid:03}:",jitter_lat,jitter_lon,boundary))  #adds in the tiger list, the tiger id and the coordinates
+                tigers.append(Animal(f"T{tigerid:03}",jitter_lat,jitter_lon,boundary))  #adds in the tiger list, the tiger id and the coordinates
                 tigerid+=1
                 count+=1
         return tigers
@@ -185,3 +184,4 @@ class Simulator:
                 ping=animal.tick()             #advance the tiger one step
                 self.publisher.push(ping)        #sends that dictionary to event hub
             t.sleep(self.tick)                  #waits for next
+
