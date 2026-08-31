@@ -8,8 +8,14 @@ from datetime import datetime, timezone #need these to track and maintain a reco
 from shapely.geometry import shape,Point #to create a boundary for the nagarahole geojson
 from azure.eventhub import EventHubProducerClient
 from azure.eventhub import EventData
+import os
+from dotenv import load_dotenv
 
+
+load_dotenv()
 geojson=r"D:\Faunoryx\Faunoryx\Nagarahole Map.geojson"
+conn_str=os.environ["conn_str"]
+eventhub_name=os.environ["eventhub_name"]
 
 #stateless math
 class GeoUtils:
@@ -185,3 +191,13 @@ class Simulator:
                 self.publisher.push(ping)        #sends that dictionary to event hub
             t.sleep(self.tick)                  #waits for next
 
+
+if __name__=="__main__":
+    boundary=GeoUtils.loadboundary(geojson)         #sets a boundary
+    tigers=Animal.spawntigers(boundary,149)     #spawns 149 tigers
+    publisher=TelemetryPublisher(conn_str,eventhub_name)       #connects to eventhub
+    sim=Simulator(boundary,publisher,tick=1800)         #creates simulator, links boundary publisher and tick
+
+    for tiger in tigers:
+        sim.addtiger(tiger)         #registers all tigers into the sim
+    sim.run()                   #starts infinite loop, real azure pushes and pings

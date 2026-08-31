@@ -23,7 +23,8 @@ resource "azurerm_eventhub_namespace" "ns"{
 }
 resource "azurerm_eventhub" "hub"{
     name=var.eventhub_name
-    namespace_id=azurerm_eventhub_namespace.ns.id
+    namespace_name=azurerm_eventhub_namespace.ns.name
+    resource_group_name=azurerm_resource_group.rg.name
     partition_count=2
     message_retention=1
 }
@@ -46,4 +47,29 @@ resource "azurerm_eventhub_authorization_rule" "listen"{
     listen=true
     send=false
     manage=false
+}
+
+resource "azurerm_consumption_budget_resource_group" "budget" {
+  name              = "faunoryx-budget"
+  resource_group_id = azurerm_resource_group.rg.id
+  amount            = var.monthly_budget_usd
+  time_grain        = "Monthly"
+
+  time_period {
+    start_date = var.budget_start_date
+  }
+
+  notification {
+    enabled        = true
+    threshold      = 80.0
+    operator       = "GreaterThan"
+    contact_emails = [var.alert_email]
+  }
+
+  notification {
+    enabled        = true
+    threshold      = 100.0
+    operator       = "GreaterThan"
+    contact_emails = [var.alert_email]
+  }
 }

@@ -19,7 +19,7 @@ variable "sku" {
 }
 
 variable "monthly_budget_usd" {
-  default = 0.6   #₹50/month target
+  default = 30
 }
 
 variable "budget_start_date" {
