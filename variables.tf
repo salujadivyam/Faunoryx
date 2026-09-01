@@ -29,3 +29,11 @@ variable "budget_start_date" {
 variable "alert_email" {
   default = "DIVYAM.ADT@GMAIL.COM"
 }
+
+variable "sql_admin_username"{
+  default="faunoryxadmin"
+}
+
+variable "sql_admin_password"{
+  sensitive=true
+}
