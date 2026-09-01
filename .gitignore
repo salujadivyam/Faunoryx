@@ -8,6 +8,17 @@ local.settings.json
 connection_strings.txt
 *.pem
 *.key
+test.py
+# throwaway script with hardcoded SQL password, never meant to be committed
+
+# --- Terraform ---
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+# tfstate can contain resource IDs/sensitive data, tfvars often holds real secrets
+# .terraform/ holds downloaded provider binaries, huge, regenerable via init
+# NOTE: keep .terraform.lock.hcl tracked, NOT ignored - ensures consistent provider versions
 
 # --- Python ---
 __pycache__/
