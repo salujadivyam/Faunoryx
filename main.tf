@@ -98,3 +98,10 @@ resource "azurerm_mssql_firewall_rule" "allow_azure" {
   start_ip_address="0.0.0.0"
   end_ip_address="0.0.0.0"
 }
+
+resource "azurerm_mssql_firewall_rule" "allow_myip"{
+  name="AllowMyIP"
+  server_id=azurerm_mssql_server.sql_server.id
+  start_ip_address=var.my_ip
+  end_ip_address=var.my_ip
+}

@@ -9,6 +9,7 @@ connection_strings.txt
 *.pem
 *.key
 test.py
+tempCodeRunnerFile.py
 # throwaway script with hardcoded SQL password, never meant to be committed
 
 # --- Terraform ---
