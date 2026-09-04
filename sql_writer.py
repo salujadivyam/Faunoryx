@@ -9,6 +9,13 @@ class SQL:
 
     def insert_telemetry(self,ping):
         self.cursor.execute( """INSERT INTO AnimalTelemetry(animal_id, timestamp, lat,lon, speed_kmph,still, speed_anomaly,outside_boundary)
-        VALUES(?,?,?,?,?,?,?,?)""")
+        VALUES(?,?,?,?,?,?,?,?)""",ping["animal_id"],ping["timestamp"],ping["lat"],ping["lon"],ping["speedkmph"],ping["still"],ping["speed_anomaly"],ping["putside_boundary"])
         self.conn.commit()
 
+    def insert_anomaly(self,ping,anomaly_type):
+        self.cursor.execute("""INSERT INTO MovementAnomalies(animal_id,timestamp,lat,lon,anomaly_type)
+        VALUES(?,?,?,?,?))""",ping["animal_id"],ping["timestamp"],ping["lat"],ping["lon"],anomaly_type)        
+        self.conn.commit()
+
+    def close(self):
+        self.conn.close()
