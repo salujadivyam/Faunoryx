@@ -18,7 +18,7 @@ sql_server=os.environ["sql_server"]
 
 async def on_event(partition_context,event,sql_writer):             #this function will run whenever an event is triggered
     body=event.body_as_str()
-    ping=json.load(body)
+    ping=json.loads(body)
     sql_writer.insert_telemetry(ping)
 
     if ping["still"]:
@@ -36,7 +36,7 @@ async def main():
     handler=partial(on_event,sql_writer=sql_writer)
     print("consumer has started, now are listening for events")
     async with client:
-        await client.receive(on_evnt=handler,starting_position="-1")
+        await client.receive(on_event=handler,starting_position="-1")
 if __name__=="__main__":
     asyncio.run(main())
 
