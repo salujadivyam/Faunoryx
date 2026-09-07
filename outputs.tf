@@ -15,3 +15,6 @@ output "sql_server_fqdn" {
 output "sql_database_name" {
   value = azurerm_mssql_database.sql_db.name
 }
+output "function_app_url" {
+  value = azurerm_linux_function_app.faunofunc.default_hostname
+}
