@@ -46,6 +46,7 @@ class GeoUtils:
     @staticmethod
     def movement_speed(lat,latnew,lon,lonnew,time,R=6371):
         dist=GeoUtils.haversine(lat,lon,latnew,lonnew,R)
+
         time=time/3600
         speed=dist/time if time>0 else 0
         return speed
@@ -97,7 +98,9 @@ class Animal:
     #one full cycle, one animal one time step, for 1800 seconds and 30 minutes
     def tick(self,stepmax=0.5,tick_mins=30,flag=12,TOP_SPEED=65):
         newlat,newlon=GeoUtils.move(self.lat,self.lon,stepmax=stepmax)  #gets new position
-        moved=(newlat!=self.lat)or(newlon!=self.lon) #to check if the animal has moved or not
+
+        dist=GeoUtils.haversine(self.lat,self.lon,newlat,newlon)    #stillness never practically occured earlier 
+        moved=dist>0.2                                              #random distance was never practically 0, fixed
         still=self.stillness(moved,tick_mins,flag)         #checks for animal stillness
         speed=GeoUtils.movement_speed(self.lat,newlat,self.lon,newlon,time=60*tick_mins)    #calculates the speed here, we used 60*tick_mins as 
         fast=self.speed_anomaly(newlat,newlon,time=60*tick_mins,TOP_SPEED=TOP_SPEED)    #checks if the movement is faster than the topspeed or not
