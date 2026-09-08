@@ -138,13 +138,13 @@ class Animal:
         while count<total:      #ensures count does not exceeds total number of tigers
             rem=total-count
             r=rd.random()
-            if r<0.9:        #90% of tigers tend to stay solitary
+            if r<0.9 or rem<2:        #90% of tigers tend to stay solitary
                 size=1
-            elif r<0.98:      #8% chance that a tiger may be mating
-                size=rd.randint(2,3)
+            elif r<0.98 or rem<4:      #8% chance that a tiger may be mating or be in a group of 3
+                size=rd.randint(2,min(rem,3))
             else:
                 size=rd.randint(4,min(rem,6))   #a very small chance for a tiger to be in an ambush or a group
-            size=min(rem,size)
+            
 
             centre_lat,centre_lon=Animal.ptinboundary(boundary)                 #assigning the random coordinate to a tiger
             for i in range(size):
