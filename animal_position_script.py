@@ -3,7 +3,6 @@ import time as t #to calculate total tick times
 import random as rd #random position of tigers
 import math as mt #used to compute haversine 
 import json #need it to use geojson
-import uuid
 from datetime import datetime, timezone #need these to track and maintain a record
 from shapely.geometry import shape,Point #to create a boundary for the nagarahole geojson
 from azure.eventhub import EventHubProducerClient
@@ -12,7 +11,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-geojson=r"D:\Faunoryx\Faunoryx\Nagarahole Map.geojson"
+geojson=r"Nagarahole Map.geojson"
 conn_str=os.environ["conn_str"]
 eventhub_name=os.environ["eventhub_name"]
 
