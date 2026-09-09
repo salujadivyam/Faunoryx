@@ -11,7 +11,6 @@ from azure.eventhub import EventData
 import os
 from dotenv import load_dotenv
 
-
 load_dotenv()
 geojson=r"D:\Faunoryx\Faunoryx\Nagarahole Map.geojson"
 conn_str=os.environ["conn_str"]
@@ -23,7 +22,6 @@ class GeoUtils:
     @staticmethod
     def move(lat,lon,stepmax=0.5):
         bearing=rd.uniform(0,360)
-        print(bearing)
         dist=rd.uniform(0,stepmax)
         latnew=lat+(dist/111)*mt.cos(mt.radians(bearing))
         lonnew=lon+dist/(111*mt.cos(mt.radians(lat)))*mt.sin(mt.radians(bearing))
@@ -80,7 +78,7 @@ class Animal:
             self.ticks+=1
         else:
             self.ticks=0
-            self.Flagged=False
+            self.flagged=False
         stillmins=self.ticks*tick_mins
         self.flagged=True if stillmins>flag*60 else False
         return self.flagged
@@ -138,7 +136,7 @@ class Animal:
         outside=self.excursion()   #calling check boundary function
         ping={
             "animal_id":self.animalid,
-            "timestamp":datetime.now(timezone.utc).isoformat(),  #converted to ist
+            "timestamp":datetime.now(timezone.utc).isoformat(),  
             "lat":self.lat,                           
             "lon":self.lon,
             "speedkmph":speed,
