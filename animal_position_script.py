@@ -97,26 +97,55 @@ class Animal:
 
     #one full cycle, one animal one time step, for 1800 seconds and 30 minutes
     def tick(self,stepmax=0.5,tick_mins=30,flag=12,TOP_SPEED=65):
-        newlat,newlon=GeoUtils.move(self.lat,self.lon,stepmax=stepmax)  #gets new position
+        behaviour_random=rd.random()
+        if behaviour_random<0.02:
+            behaviour="hunting"
+
+            sprinttime=rd.uniform(5.5384615384615,22.153846153846) #since tigers can maintain top speed for 40 to 100 meters, hence time=distance/speed  (this is in seconds)
+            sprintspeed=rd.uniform(52,70) #speed for sprinting can lie between 45 kmph and 70 kph
+            sprintdist=(sprintspeed/3600)*sprinttime   #this finds distance in km
+            bearing=rd.uniform(0,360)
+
+            newlat=self.lat+(sprintdist/111)*mt.cos(mt.radians(bearing))
+            newlon=self.lon+sprintdist/(111*mt.cos(mt.radians(self.lat)))*mt.sin(mt.radians(bearing))
+            time_for_speed=sprinttime
+
+        elif behaviour_random<0.05:
+            behaviour="sustained-fast"
+
+            sustainspeed=rd.uniform(38,52)
+            sustaintime=35
+            sustaindist=(sustainspeed/3600)*sustaintime
+            bearing=rd.uniform(0,360)
+
+            newlat=self.lat+(sustaindist/111)*mt.cos(mt.radians(bearing))
+            newlon=self.lon+sustaindist/(111*mt.cos(mt.radians(self.lat)))*mt.sin(mt.radians(bearing))
+            time_for_speed=sustaintime
+
+        else:
+            behaviour="normal"
+            newlat,newlon=GeoUtils.move(self.lat,self.lon,stepmax=stepmax)
+            time_for_speed=60*tick_mins
 
         dist=GeoUtils.haversine(self.lat,self.lon,newlat,newlon)    #stillness never practically occured earlier 
-        moved=dist>0.2                                              #random distance was never practically 0, fixed
+        moved=dist>0.02                                              #random distance was never practically 0, fixed
         still=self.stillness(moved,tick_mins,flag)         #checks for animal stillness
-        speed=GeoUtils.movement_speed(self.lat,newlat,self.lon,newlon,time=60*tick_mins)    #calculates the speed here, we used 60*tick_mins as 
-        fast=self.speed_anomaly(newlat,newlon,time=60*tick_mins,TOP_SPEED=TOP_SPEED)    #checks if the movement is faster than the topspeed or not
+        speed=GeoUtils.movement_speed(self.lat,newlat,self.lon,newlon,time=time_for_speed)    #calculates the speed here, we used 60*tick_mins as 
+        fast=speed>TOP_SPEED or speed>=38 and time_for_speed>=35
 
         #now updating the latitute and longitute 
         self.lat,self.lon=newlat,newlon
         outside=self.excursion()   #calling check boundary function
         ping={
             "animal_id":self.animalid,
-            "timestamp":datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'),  #converted to ist
+            "timestamp":datetime.now(timezone.utc).isoformat(),  #converted to ist
             "lat":self.lat,                           
             "lon":self.lon,
             "speedkmph":speed,
             "still":still,
             "speed_anomaly":fast,
-            "outside_boundary":outside
+            "outside_boundary":outside,
+            "behaviour":behaviour
         }
         return ping                #created a ping dictionary, sends back to caller, readies for event hubs push
 
