@@ -11,7 +11,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-geojson=r"Nagarahole Map.geojson"
+geojson=r"Nagarahole Map.geojson"       #using a relative path
 conn_str=os.environ["conn_str"]
 eventhub_name=os.environ["eventhub_name"]
 
