@@ -1,16 +1,16 @@
-# Third-Party Notices
+Third-Party Notices
 
 This project's dashboard frontend adapts code and patterns from the
 following open-source repository. This file exists to satisfy the
 attribution requirement of that repository's MIT License.
 
 
-## Azure Maps Code Samples
+Azure Maps Code Samples
 
 Source: https://github.com/Azure-Samples/AzureMapsCodeSamples
 License: MIT
 Used for: Map initialization, data source, and symbol/polygon layer
-patterns in the Faunoryx dashboard (`dashboard/index.html`).
+patterns in the Faunoryx dashboard (dashboard/index.html).
 
 MIT License
 
@@ -34,7 +34,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE
 
----
 
 All other code in this repository (simulator, consumer, SQL layer,
 Terraform infrastructure, and Azure Function logic) is original work
