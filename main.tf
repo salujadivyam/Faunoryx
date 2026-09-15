@@ -129,5 +129,37 @@ resource "azurerm_linux_function_app" "faunofunc" {
   service_plan_id=azurerm_service_plan.faunoservice.id
   storage_account_name=azurerm_storage_account.faunostore.name
   storage_account_access_key=azurerm_storage_account.faunostore.primary_access_key
-  site_config {}
+  site_config {
+    application_stack{
+      python_version="3.11"
+    }
+  }
+}
+
+resource "azurerm_monitor_action_group" "faunoryx-actions"{
+  name="faunogroup"
+  resource_group_name=azurerm_resource_group.rg.name
+
+  email_receiver{
+    name="divyam.adt@gmail.com"
+    email_address=var.alert_email
+  }
+}
+
+resource "azurerm_monitor_metric_alert" "azure_monitor"{
+  name="faunoryx-func-error-alert"
+  resource_group_name=azurerm_resource_group.rg.name
+  scopes=[azurerm_linux_function_app.faunofunc.id]
+  description="Alerts when function app returns server errors"
+
+  criteria{
+    metric_namespace="Microsoft.Web/sites"
+    metric_name="Http5xx"
+    aggregation="Total"
+    operator="GreaterThan"
+    threshold=5
+  }
+  action{
+    action_group_id=azurerm_monitor_action_group.faunoryx-actions.id
+  }
 }
