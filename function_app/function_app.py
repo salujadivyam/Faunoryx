@@ -26,3 +26,37 @@ def alert(req:fn.HttpRequest)->fn.HttpResponse:
     logging.warning(message)
     
     return fn.HttpResponse(json.dumps({"status":"received","message":message}),mimetype="application/json",status_code=200)   #ok
+
+
+#telemetry position endpoint
+@app.route(route="positions",auth_level=fn.AuthLevel.ANONYMOUS)
+def positions(req:fn.HttpRequest)->fn.HttpResponse:
+    logging.info("Positions function has been triggered")
+    try:
+        driver="{ODBC Driver 18 for SQL Server}"
+        server=os.environ["sql_server"]
+        database=os.environ["sql_database"]
+        username=os.environ["sql_username"]
+        password=os.environ["sql_password"]
+
+        conn_str=f"Driver={driver};Server={server};Database={database}; UID={username};PWD={password}"
+        conn=pyodbc.connect(conn_str)
+        cursor=conn.cursor()
+
+        cursor.execute("""SELECT t.animal_id,t.lat, t.lon ,t.speed_kmph, t.still,t.speed_anomaly, t.outside_boundary FROM AnimalTelemetry AS t
+        WHERE t.timestamp=(SELECT MAX(t2.timestamp) FROM AnimalTelemetry AS t2 WHERE t2.animal_id=t.animal_id)""")
+
+        rows=cursor.fetchall()
+        res=[]
+        for row in rows:
+            res.append({
+                "animal_id":row[0],"lat":row[1], "lon":row[2] ,"speed_kmph":row[3],"still":row[4],"speed_anomaly":row[5],
+                "outside_boundary":row[6]})
+
+        conn.close()
+        return fn.HttpResponse(json.dumps(res),mimetype="application/json",status_code=200)   #ok
+
+    except Exception as e:
+        logging.error(f"Position endpoint failed: {e}")
+        return fn.HttpResponse(json.dumps({"error":str(e)}),mimetype="application/json",status_code=500)  #internal server error 
+    
