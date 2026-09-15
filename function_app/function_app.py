@@ -9,7 +9,7 @@ app=fn.FunctionApp()
 
 #anomaly alert endpoint
 @app.route(route="alert",auth_level=fn.AuthLevel.FUNCTION)
-def alert(req=fn.HttpRequest)->fn.HttpResponse:
+def alert(req:fn.HttpRequest)->fn.HttpResponse:
     logging.info("Alert function triggered")                #http endpoint that works when an alert is triggered
     try:        
         data=req.get_json()
@@ -20,7 +20,7 @@ def alert(req=fn.HttpRequest)->fn.HttpResponse:
     lat=data.get("lat")
     lon=data.get("lon")
 
-    if not animal_id or anomaly_type:       #missing fields
+    if not animal_id or not anomaly_type:       #missing fields
         return fn.HttpResponse("Missing fields",status_code=400)    #bad request
     message=f"ALERT: Tiger {animal_id}-{anomaly_type} detected at ({lat},{lon})"
     logging.warning(message)
