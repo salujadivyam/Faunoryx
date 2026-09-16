@@ -5,7 +5,6 @@ from functools import partial
 from dotenv import load_dotenv
 from azure.eventhub.aio import EventHubConsumerClient
 from functools import partial
-from function_app import function_app
 from sql_writer import SQL
 import requests
 
