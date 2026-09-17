@@ -134,6 +134,12 @@ resource "azurerm_linux_function_app" "faunofunc" {
       python_version="3.11"
     }
   }
+  app_settings={
+    "sql_server"=azurerm_mssql_server.sql_server.fully_qualified_domain_name
+    "sql_database"=azurerm_mssql_database.sql_db.name
+    "sql_admin_username"=var.sql_admin_username
+    "sql_admin_password"=var.sql_admin_password
+  }
 }
 
 resource "azurerm_monitor_action_group" "faunoryx-actions"{
@@ -162,4 +168,10 @@ resource "azurerm_monitor_metric_alert" "azure_monitor"{
   action{
     action_group_id=azurerm_monitor_action_group.faunoryx-actions.id
   }
+}
+
+resource "azurerm_maps_account" "maps"{
+  name="faunomap"
+  resource_group_name=azurerm_resource_group.rg.name
+  sku_name="G2"
 }

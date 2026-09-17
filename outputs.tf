@@ -18,3 +18,7 @@ output "sql_database_name" {
 output "function_app_url" {
   value = azurerm_linux_function_app.faunofunc.default_hostname
 }
+output "maps_primary_key"{
+  value=azurerm_maps_account.maps.primary_access_key
+  sensitive=true
+}
