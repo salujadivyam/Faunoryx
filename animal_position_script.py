@@ -225,7 +225,7 @@ if __name__=="__main__":
     boundary=GeoUtils.loadboundary(geojson)         #sets a boundary
     tigers=Animal.spawntigers(boundary,149)     #spawns 149 tigers
     publisher=TelemetryPublisher(conn_str,eventhub_name)       #connects to eventhub
-    sim=Simulator(boundary,publisher,tick=1800)         #creates simulator, links boundary publisher and tick
+    sim=Simulator(boundary,publisher,tick=int(os.environ.get("tick_seconds",1800)))         #creates simulator, links boundary publisher and tick
 
     for tiger in tigers:
         sim.addtiger(tiger)         #registers all tigers into the sim
