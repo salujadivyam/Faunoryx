@@ -160,3 +160,23 @@ def recent_anomalies(req:fn.HttpRequest)->fn.HttpResponse:
     except Exception as e:
         logging.error(f"Recent Anomalies endpoint has failed: {e}")
         return fn.HttpResponse(json.dumps({"error":str(e)}),mimetype="application/json",status_code=500)
+
+@app.route(route="trend",auth_level=fn.AuthLevel.ANONYMOUS)
+def trend(req:fn.HttpRequest)->fn.HttpResponse:
+    logging.info("Trend function triggered")
+
+
+    try:
+        conn=get_connection()
+        cursor=conn.cursor()
+        cursor.execute("""SELECT DATEPART(hour,timestamp) AS hr, anomaly_type, COUNT(*) AS cnt FROM MovementAnomalies
+        WHERE timestamp>=DATEADD(hour,-24,SYSUTCDATETIME()) GROUP BY DATEPART(hour,timestamp),anomaly_type ORDER BY hr""")
+        rows=cursor.fetchall()
+        res=[{"hour":row[0],"anomaly_type":row[1],"count":row[2]} for row in rows]
+        cursor.close()
+        conn.close()
+        
+        return fn.HttpResponse(json.dumps(res),mimetype="application/json",status_code=200)
+    except Exception as e:
+        logging.error(f"Trend endpoint failed: {e}")
+        return fn.HttpResponse(json.dumps({"error":str(e)}),mimetype="application/json",status_code=500)
