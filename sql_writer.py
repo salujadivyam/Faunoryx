@@ -8,8 +8,8 @@ class SQL:
         self.cursor=self.conn.cursor()
 
     def insert_telemetry(self,ping):
-        self.cursor.execute( """INSERT INTO AnimalTelemetry(animal_id, timestamp, lat,lon, speed_kmph,still, speed_anomaly,outside_boundary)
-        VALUES(?,?,?,?,?,?,?,?)""",ping["animal_id"],ping["timestamp"],ping["lat"],ping["lon"],ping["speedkmph"],ping["still"],ping["speed_anomaly"],ping["outside_boundary"])
+        self.cursor.execute( """INSERT INTO AnimalTelemetry(animal_id, timestamp, lat,lon, speed_kmph,still, speed_anomaly,outside_boundary,behaviour)
+        VALUES(?,?,?,?,?,?,?,?,?)""",ping["animal_id"],ping["timestamp"],ping["lat"],ping["lon"],ping["speedkmph"],ping["still"],ping["speed_anomaly"],ping["outside_boundary"],ping["behaviour"])
         self.conn.commit()
 
     def insert_anomaly(self,ping,anomaly_type):
