@@ -30,9 +30,7 @@ resource "azurerm_eventhub" "hub"{
 
 resource "azurerm_eventhub_authorization_rule" "send"{
     name="send-policy"
-    namespace_name=azurerm_eventhub_namespace.ns.name
-    eventhub_name=azurerm_eventhub.hub.name
-    resource_group_name=azurerm_resource_group.rg.name
+    eventhub_id=azurerm_eventhub.hub.id
     listen=false
     send=true
     manage=false
@@ -40,9 +38,7 @@ resource "azurerm_eventhub_authorization_rule" "send"{
 
 resource "azurerm_eventhub_authorization_rule" "listen"{
     name="listen-policy"
-    namespace_name=azurerm_eventhub_namespace.ns.name
-    eventhub_name=azurerm_eventhub.hub.name
-    resource_group_name=azurerm_resource_group.rg.name
+    eventhub_id=azurerm_eventhub.hub.id
     listen=true
     send=false
     manage=false
@@ -137,8 +133,8 @@ resource "azurerm_linux_function_app" "faunofunc" {
   app_settings={
     "sql_server"=azurerm_mssql_server.sql_server.fully_qualified_domain_name
     "sql_database"=azurerm_mssql_database.sql_db.name
-    "sql_admin_username"=var.sql_admin_username
-    "sql_admin_password"=var.sql_admin_password
+    "sql_username"=var.sql_admin_username
+    "sql_password"=var.sql_admin_password
   }
 }
 
