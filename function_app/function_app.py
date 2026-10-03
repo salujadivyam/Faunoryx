@@ -94,3 +94,50 @@ def history(req:fn.HttpRequest)->fn.HttpResponse:
     except Exception as e:
         logging.error(f"History endpoint failed: {e}")
         return fn.HttpResponse(json.dumps({"error":str(e)}),mimetype="application/json",status_code=500)    #internal server error
+
+
+@app.route(route="stats",auth_level=fn.AuthLevel.ANONYMOUS)       #feeds dashboard pie chart, counters, top-5 fastest panel
+def stats(req:fn.HttpRequest)->fn.HttpResponse:
+    logging.info("Stats function triggered")
+    try:
+        conn=get_connection()
+        cursor=conn.cursor()
+
+        cursor.execute("""SELECT t.behaviour, t.speed_kmph, t.still, t.outside_boundary, t.animal_id FROM AnimalTelemetry AS t
+        WHERE t.timestamp=(SELECT MAX(t2.timestamp) FROM AnimalTelemetry AS t2 WHERE t2.animal_id=t.animal_id)""")
+        rows=cursor.fetchall()
+
+        behaviour_counts={"normal":0,"sustained-fast":0,"hunting":0}
+        still_count=0
+        outside_count=0
+        speeds=[]
+        for row in rows:
+            behaviour,speed,still,outside,animal_id=row
+            if behaviour in behaviour_counts:
+                behaviour_counts[behaviour]+=1
+            if still:
+                still_count+=1
+            if outside:
+                outside_count+=1
+            speeds.append((animal_id,speed))
+
+        speeds.sort(key=lambda x:x[1],reverse=True)
+        top5=[{"animal_id":a,"speed_kmph":s} for a,s in speeds[:5]]
+        avg_speed=sum(s for _,s in speeds)/len(speeds) if speeds else 0
+
+        res={
+            "total_tigers":len(rows),
+            "behaviour_counts":behaviour_counts,
+            "still_count":still_count,
+            "outside_count":outside_count,
+            "avg_speed_kmph":round(avg_speed,2),
+            "top5_fastest":top5
+        }
+
+        cursor.close()
+        conn.close()
+        return fn.HttpResponse(json.dumps(res),mimetype="application/json",status_code=200)
+
+    except Exception as e:
+        logging.error(f"Stats endpoint failed: {e}")
+        return fn.HttpResponse(json.dumps({"error":str(e)}),mimetype="application/json",status_code=500)
