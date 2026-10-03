@@ -46,7 +46,7 @@ def positions(req:fn.HttpRequest)->fn.HttpResponse:
         conn=get_connection()
         cursor=conn.cursor()
 
-        cursor.execute("""SELECT t.animal_id,t.lat, t.lon ,t.speed_kmph, t.still,t.speed_anomaly, t.outside_boundary FROM AnimalTelemetry AS t
+        cursor.execute("""SELECT t.animal_id,t.lat, t.lon ,t.speed_kmph, t.still,t.speed_anomaly, t.outside_boundary, t.behaviour FROM AnimalTelemetry AS t
         WHERE t.timestamp=(SELECT MAX(t2.timestamp) FROM AnimalTelemetry AS t2 WHERE t2.animal_id=t.animal_id)""")  #gives the latest record for each animal
 
         rows=cursor.fetchall()
@@ -54,7 +54,7 @@ def positions(req:fn.HttpRequest)->fn.HttpResponse:
         for row in rows:
             res.append({
                 "animal_id":row[0],"lat":row[1], "lon":row[2] ,"speed_kmph":row[3],"still":row[4],"speed_anomaly":row[5],
-                "outside_boundary":row[6]})
+                "outside_boundary":row[6],"behaviour":row[7]})
 
         cursor.close()
         conn.close()
@@ -94,4 +94,3 @@ def history(req:fn.HttpRequest)->fn.HttpResponse:
     except Exception as e:
         logging.error(f"History endpoint failed: {e}")
         return fn.HttpResponse(json.dumps({"error":str(e)}),mimetype="application/json",status_code=500)    #internal server error
-
