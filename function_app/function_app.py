@@ -141,3 +141,22 @@ def stats(req:fn.HttpRequest)->fn.HttpResponse:
     except Exception as e:
         logging.error(f"Stats endpoint failed: {e}")
         return fn.HttpResponse(json.dumps({"error":str(e)}),mimetype="application/json",status_code=500)
+
+@app.route(route="recent-anomalies",auth_level=fn.AuthLevel.ANONYMOUS)
+def recent_anomalies(req:fn.HttpRequest)->fn.HttpResponse:
+    logging.info("Recent Anomalies function has been triggered")
+
+    try:
+        conn=get_connection()
+        cursor=conn.curor()
+        cursor.execute("""SELECT TOP 20 animal_id,timestamp,lat,lon,anomaly_type FROM MovementAnomalies ORDER BY timestamp DESC""")
+        rows=cursor.fetchall()
+        res=[]
+        for row in rows:
+            res.append({"animal_id":row[0],"timestamp":row[1].isoformat() if hasattr(row[1],"isoformat") else str(row[1]),"lat":row[2],"lon":row[3],"anomaly_type":row[4]})
+        cursor.close()
+        conn.close()
+        return fn.HttpResponse(json.dumps(res),mimetype="application/json",status_code=200)
+    except Exception as e:
+        logging.error(f"Recent Anomalies endpoint has failed: {e}")
+        return fn.HttpResponse(json.dumps({"error":str(e)}),mimetype="application/json",status_code=500)
