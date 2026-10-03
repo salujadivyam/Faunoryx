@@ -22,3 +22,11 @@ output "maps_primary_key"{
   value=azurerm_maps_account.maps.primary_access_key
   sensitive=true
 }
+output "maps_primary_key"{
+  value=azurerm_maps_account.maps.primary_access_key
+  sensitive=true
+}
+
+output "function_app_hostname"{
+  value=azurerm_linux_function_app.faunofunc.default_hostname
+}
