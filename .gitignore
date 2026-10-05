@@ -85,3 +85,4 @@ desktop.ini
 # --- Misc ---
 *.bak
 *.tmp
+terraform/.terraform.lock.hcl

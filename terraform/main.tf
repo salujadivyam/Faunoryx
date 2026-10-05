@@ -30,7 +30,9 @@ resource "azurerm_eventhub" "hub"{
 
 resource "azurerm_eventhub_authorization_rule" "send"{
     name="send-policy"
-    eventhub_id=azurerm_eventhub.hub.id
+    namespace_name=azurerm_eventhub_namespace.ns.name
+    eventhub_name=azurerm_eventhub.hub.name
+    resource_group_name=azurerm_resource_group.rg.name
     listen=false
     send=true
     manage=false
@@ -38,7 +40,9 @@ resource "azurerm_eventhub_authorization_rule" "send"{
 
 resource "azurerm_eventhub_authorization_rule" "listen"{
     name="listen-policy"
-    eventhub_id=azurerm_eventhub.hub.id
+    namespace_name=azurerm_eventhub_namespace.ns.name
+    eventhub_name=azurerm_eventhub.hub.name
+    resource_group_name=azurerm_resource_group.rg.name
     listen=true
     send=false
     manage=false
@@ -141,6 +145,7 @@ resource "azurerm_linux_function_app" "faunofunc" {
 resource "azurerm_monitor_action_group" "faunoryx-actions"{
   name="faunogroup"
   resource_group_name=azurerm_resource_group.rg.name
+  short_name="faunoryx"
 
   email_receiver{
     name="divyam.adt@gmail.com"
@@ -169,5 +174,7 @@ resource "azurerm_monitor_metric_alert" "azure_monitor"{
 resource "azurerm_maps_account" "maps"{
   name="faunomap"
   resource_group_name=azurerm_resource_group.rg.name
+  location=azurerm_resource_group.rg.location
   sku_name="G2"
+  
 }
