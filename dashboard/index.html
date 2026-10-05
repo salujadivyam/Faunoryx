@@ -5,13 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Faunoryx: Nagarahole Tiger Reserve</title>
 
-<!-- ============================================================
-     CONFIG - fill in before deploying, see bottom of <script>
-     The map itself needs no external key: it's drawn straight
-     from your geojson boundary, no tile provider involved.
-     ============================================================ -->
+<!-- CONFIG - fill in before deploying, see bottom of <script> -->
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://atlas.microsoft.com/sdk/javascript/mapcontrol/3/atlas.min.css" rel="stylesheet" />
+<script src="https://atlas.microsoft.com/sdk/javascript/mapcontrol/3/atlas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 
 <style>
@@ -39,7 +37,7 @@
   .suffix{ font-family:'IBM Plex Mono',monospace; text-transform:lowercase; font-weight:400; color:var(--ink-soft); }
   button{ font-family:inherit; cursor:pointer; background:none; border:none; color:inherit; }
 
-  /* ---------- header ---------- */
+  /* header */
   header{
     display:flex; align-items:center; justify-content:space-between;
     padding:9px 18px; border-bottom:1px solid var(--border);
@@ -56,7 +54,7 @@
   .link-btn{ color:var(--ink); font-size:13px; }
   .link-btn:hover{ color:var(--accent-2); }
 
-  /* ---------- body layout ---------- */
+  /* body layout */
   .layout{ flex:1 1 auto; display:flex; min-height:0; }
   .sidebar{ width:232px; flex:0 0 232px; border-right:1px solid var(--border); padding:14px 14px; overflow-y:auto; display:flex; flex-direction:column; }
   .mapcol{ flex:1 1 auto; position:relative; min-width:0; }
@@ -78,7 +76,7 @@
   .weather .row{ display:flex; justify-content:space-between; font-size:13px; padding:3px 0; color:var(--ink-soft); border-top:1px solid var(--border); }
   .weather .row b{ color:var(--ink); font-weight:500; }
 
-  /* ---------- tiger info panel, replaces sidebar default ---------- */
+  /* tiger info panel, replaces sidebar default */
   .tiger-info{ display:none; flex-direction:column; }
   .tiger-info.active{ display:flex; }
   .tiger-info .back{ color:var(--accent-2); font-size:12px; margin-bottom:10px; align-self:flex-start; }
@@ -88,14 +86,13 @@
   .tiger-info .row span:first-child{ color:var(--ink-soft); }
   .pathnote{ margin-top:10px; font-size:12px; color:var(--ink-soft); }
 
-  /* ---------- map ---------- */
-  #mapSvg{ width:100%; height:100%; display:block; background:var(--map-bg); cursor:grab; }
-  #mapSvg:active{ cursor:grabbing; }
+  /* map */
+  #map{ width:100%; height:100%; }
   .mapOverlay{ position:absolute; left:14px; bottom:12px; font-size:12px; color:#3A3F37; background:rgba(245,243,236,.85); padding:3px 8px; border-radius:4px; pointer-events:none; }
   .mapOverlay b{ color:#161A15; }
   .zoomHint{ position:absolute; right:14px; bottom:12px; font-size:11px; color:#5C6354; background:rgba(245,243,236,.85); padding:3px 8px; border-radius:4px; pointer-events:none; }
 
-  /* ---------- bottom ticker strip ---------- */
+  /* bottom ticker strip */
   .ticker{ flex:0 0 auto; display:flex; border-top:1px solid var(--border); }
   .tick{ flex:1; padding:8px 18px; border-right:1px solid var(--border); }
   .tick:last-child{ border-right:none; }
@@ -106,7 +103,7 @@
   .tick .val .suffix{ font-size:13px; font-weight:400; }
   .tick.activity .val{ font-size:13px; font-weight:500; }
 
-  /* ---------- modal ---------- */
+  /* modal */
   .modal-backdrop{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); align-items:center; justify-content:center; z-index:50; }
   .modal-backdrop.open{ display:flex; }
   .modal{ background:var(--bg); border:1px solid var(--border); border-radius:6px; width:min(680px,92vw); max-height:80vh; overflow:auto; padding:20px 24px; }
@@ -192,18 +189,7 @@
   </div>
 
   <div class="mapcol">
-    <svg id="mapSvg" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet">
-      <defs>
-        <pattern id="terrainHatch" width="14" height="14" patternTransform="rotate(35)" patternUnits="userSpaceOnUse">
-          <line x1="0" y1="0" x2="0" y2="14" stroke="var(--map-line)" stroke-width="0.5" opacity="0.25"/>
-        </pattern>
-        <marker id="arrowHead" markerWidth="8" markerHeight="8" refX="5" refY="4" orient="auto">
-          <path d="M0,0 L8,4 L0,8 Z" fill="var(--accent)" />
-        </marker>
-      </defs>
-      <rect width="1000" height="700" fill="var(--map-bg)" />
-      <g id="mapGroup"></g>
-    </svg>
+    <div id="map"></div>
     <div class="mapOverlay" id="mapOverlay">updated <b id="mapUpdated">-</b> ago &nbsp;·&nbsp; <span id="mapDemoFlag"></span></div>
     <div class="zoomHint">scroll to zoom · drag to pan</div>
   </div>
@@ -236,10 +222,9 @@
 </div>
 
 <script>
-/* ============================================================
-   CONFIG
-   ============================================================ */
+// CONFIG
 const CONFIG = {
+  AZURE_MAPS_KEY: "YOUR_AZURE_MAPS_KEY",
   API_BASE: "https://YOUR-FUNCTION-APP.azurewebsites.net/api",
   GEOJSON_PATH: "Nagarahole Map.geojson",
   NAGARAHOLE_LAT: 12.00,
@@ -248,9 +233,7 @@ const CONFIG = {
 };
 const isDemo = CONFIG.API_BASE.includes("YOUR-FUNCTION-APP");
 
-/* ============================================================
-   THEME
-   ============================================================ */
+// THEME
 const root = document.documentElement;
 const themeBtn = document.getElementById('themeToggle');
 function applyTheme(t){
@@ -265,9 +248,7 @@ themeBtn.addEventListener('click', ()=> applyTheme(root.getAttribute('data-theme
 
 function cssVar(name){ return getComputedStyle(root).getPropertyValue(name).trim(); }
 
-/* ============================================================
-   STATUS LOGIC
-   ============================================================ */
+// STATUS LOGIC
 function statusOf(p){
   if(p.speed_anomaly) return 'anomaly';
   if(p.behaviour === 'hunting') return 'hunting';
@@ -276,11 +257,8 @@ function statusOf(p){
 }
 function statusColor(s){ return cssVar('--c-' + s); }
 
-/* ============================================================
-   BOUNDARY + PROJECTION
-   ============================================================ */
+// BOUNDARY
 let boundaryRing = null;
-let proj = null;
 
 function pointInBoundary(lon, lat){
   if(!boundaryRing) return true;
@@ -294,27 +272,6 @@ function pointInBoundary(lon, lat){
   return inside;
 }
 
-function computeProjection(ring){
-  let minLon=Infinity,maxLon=-Infinity,minLat=Infinity,maxLat=-Infinity;
-  ring.forEach(([lon,lat])=>{
-    minLon=Math.min(minLon,lon); maxLon=Math.max(maxLon,lon);
-    minLat=Math.min(minLat,lat); maxLat=Math.max(maxLat,lat);
-  });
-  const padLon=(maxLon-minLon)*0.18 || 0.05, padLat=(maxLat-minLat)*0.18 || 0.05;
-  minLon-=padLon; maxLon+=padLon; minLat-=padLat; maxLat+=padLat;
-  const w=1000, h=700;
-  const scale = Math.min(w/(maxLon-minLon), h/(maxLat-minLat));
-  const offsetX = (w - (maxLon-minLon)*scale)/2;
-  const offsetY = (h - (maxLat-minLat)*scale)/2;
-  return {minLon,minLat,maxLon,maxLat,scale,offsetX,offsetY,w,h};
-}
-function project(lon,lat){
-  const p=proj;
-  const x = (lon-p.minLon)*p.scale + p.offsetX;
-  const y = p.h - ((lat-p.minLat)*p.scale + p.offsetY);
-  return [x,y];
-}
-
 function fallbackBoundaryRing(){
   // rough Nagarahole-shaped box used only if the geojson fails to load,
   // so the map still renders something sensible rather than nothing
@@ -324,85 +281,100 @@ function fallbackBoundaryRing(){
            [lonC-0.18,latC-0.14]];
 }
 
-/* ============================================================
-   SVG MAP - pan + zoom
-   ============================================================ */
-const svgEl = document.getElementById('mapSvg');
-const mapGroup = document.getElementById('mapGroup');
-let viewScale=1, viewTx=0, viewTy=0;
-let isPanning=false, panStart={x:0,y:0}, viewStart={tx:0,ty:0};
+// AZURE MAPS
+let map, boundarySource, tigerSource, pathSource;
+let selectedId = null;
+let mapReadyResolve;
+const mapReady = new Promise(res => mapReadyResolve = res);
 
-function applyTransform(){
-  mapGroup.setAttribute('transform', `translate(${viewTx} ${viewTy}) scale(${viewScale})`);
-}
-function svgCoords(evt){
-  const rect = svgEl.getBoundingClientRect();
-  return [(evt.clientX-rect.left)/rect.width*1000, (evt.clientY-rect.top)/rect.height*700];
-}
-svgEl.addEventListener('wheel', (e)=>{
-  e.preventDefault();
-  const [mx,my] = svgCoords(e);
-  const factor = e.deltaY < 0 ? 1.12 : 0.89;
-  const newScale = Math.min(7, Math.max(0.7, viewScale*factor));
-  viewTx = mx - (mx-viewTx)*(newScale/viewScale);
-  viewTy = my - (my-viewTy)*(newScale/viewScale);
-  viewScale = newScale;
-  applyTransform();
-}, { passive:false });
-svgEl.addEventListener('mousedown', (e)=>{ isPanning=true; panStart={x:e.clientX,y:e.clientY}; viewStart={tx:viewTx,ty:viewTy}; });
-window.addEventListener('mousemove', (e)=>{
-  if(!isPanning) return;
-  const rect = svgEl.getBoundingClientRect();
-  viewTx = viewStart.tx + (e.clientX-panStart.x)/rect.width*1000;
-  viewTy = viewStart.ty + (e.clientY-panStart.y)/rect.height*700;
-  applyTransform();
-});
-window.addEventListener('mouseup', ()=> isPanning=false);
-
-function svgEl_(tag, attrs){
-  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
-  for(const k in attrs) el.setAttribute(k, attrs[k]);
-  return el;
-}
-
-function drawBoundary(ring){
-  const pts = ring.map(([lon,lat])=>project(lon,lat).join(',')).join(' ');
-  mapGroup.appendChild(svgEl_('polygon',{points:pts, fill:'var(--map-land)'}));
-  mapGroup.appendChild(svgEl_('polygon',{points:pts, fill:'url(#terrainHatch)'}));
-  mapGroup.appendChild(svgEl_('polygon',{points:pts, fill:'none', stroke:'var(--map-line)', 'stroke-width':2, 'stroke-dasharray':'5,4', opacity:0.85}));
-}
-
-let markerLayer, trailLayer, selectedId = null;
-function ensureLayers(){
-  if(!markerLayer){ markerLayer = svgEl_('g',{id:'markerLayer'}); mapGroup.appendChild(markerLayer); }
-  if(!trailLayer){ trailLayer = svgEl_('g',{id:'trailLayer'}); mapGroup.appendChild(trailLayer); }
-}
-
-function renderMarkers(rows){
-  ensureLayers();
-  markerLayer.innerHTML = '';
-  rows.forEach(p=>{
-    const [x,y] = project(p.lon, p.lat);
-    const status = statusOf(p);
-    const isSel = p.animal_id === selectedId;
-    if(p.outside_boundary){
-      markerLayer.appendChild(svgEl_('circle',{cx:x,cy:y,r:isSel?10:7,fill:'none',stroke:'var(--c-outside)','stroke-width':2.4}));
+function initAzureMap(){
+  map = new atlas.Map('map', {
+    center: [CONFIG.NAGARAHOLE_LON, CONFIG.NAGARAHOLE_LAT],
+    zoom: 10.5,
+    style: 'grayscale_dark',
+    view: 'Auto',
+    authOptions: {
+      authType: 'subscriptionKey',
+      subscriptionKey: CONFIG.AZURE_MAPS_KEY
     }
-    const c = svgEl_('circle',{cx:x,cy:y,r:isSel?5.5:3.2,fill:statusColor(status),stroke:'#fff','stroke-width':isSel?1.2:0.6,'data-id':p.animal_id,class:'tigerDot'});
-    c.style.cursor='pointer';
-    c.addEventListener('click',(e)=>{ e.stopPropagation(); onTigerClick(p); });
-    markerLayer.appendChild(c);
-    if(isSel){
-      const t = svgEl_('text',{x:x+8,y:y-8,fill:'#fff',stroke:'#000','stroke-width':2.5,'paint-order':'stroke',style:'font:600 9px Inter,sans-serif'});
-      t.textContent = p.animal_id;
-      markerLayer.appendChild(t);
+  });
+
+  map.events.add('ready', async ()=>{
+    boundarySource = new atlas.source.DataSource();
+    tigerSource = new atlas.source.DataSource();
+    pathSource = new atlas.source.DataSource();
+    map.sources.add([boundarySource, tigerSource, pathSource]);
+
+    try{
+      const res = await fetch(CONFIG.GEOJSON_PATH);
+      const gj = await res.json();
+      boundaryRing = gj.features[0].geometry.coordinates[0];
+      setWeatherCoordsFromBoundary(boundaryRing);
+      boundarySource.add(gj);
+    }catch(e){
+      boundaryRing = fallbackBoundaryRing();
+      boundarySource.add(new atlas.data.Polygon([boundaryRing]));
     }
+
+    map.layers.add(new atlas.layer.PolygonLayer(boundarySource, null, {
+      fillColor: '#4F7038', fillOpacity: 0.08
+    }));
+    map.layers.add(new atlas.layer.LineLayer(boundarySource, null, {
+      strokeColor: '#4F7038', strokeWidth: 2, strokeDashArray: [2,2]
+    }));
+
+    // outside-boundary ring, drawn under the fill
+    map.layers.add(new atlas.layer.BubbleLayer(tigerSource, 'outsideRing', {
+      radius: 14, color: 'rgba(0,0,0,0)',
+      strokeColor: statusColor('outside'), strokeWidth: 3,
+      filter: ['==', ['get','outside_boundary'], true]
+    }));
+
+    const tigerLayer = new atlas.layer.BubbleLayer(tigerSource, 'tigers', {
+      radius: ['case', ['get','selected'], 7, 4],
+      strokeColor: '#ffffff',
+      strokeWidth: ['case', ['get','selected'], 1.6, 0.6],
+      color: [
+        'case',
+        ['==', ['get','status'], 'anomaly'], statusColor('anomaly'),
+        ['==', ['get','status'], 'hunting'], statusColor('hunting'),
+        ['==', ['get','status'], 'still'],   statusColor('still'),
+        statusColor('normal')
+      ]
+    });
+    map.layers.add(tigerLayer);
+
+    map.layers.add(new atlas.layer.SymbolLayer(tigerSource, 'labels', {
+      iconOptions: { image: 'none' },
+      textOptions: { textField: ['get','animal_id'], offset: [0,1.1], size: 11, color: '#ffffff', haloColor:'#000000', haloWidth:1 },
+      filter: ['==', ['get','selected'], true]
+    }));
+
+    map.layers.add(new atlas.layer.LineLayer(pathSource, null, {
+      strokeColor: '#4F7038', strokeWidth: 3,
+      strokeDashArray: ['case', ['get','inside'], ['literal',[1,0]], ['literal',[2,2]]]
+    }));
+
+    map.events.add('click', tigerLayer, (e)=>{
+      if(!e.shapes || !e.shapes.length) return;
+      onTigerClick(e.shapes[0].getProperties());
+    });
+
+    mapReadyResolve();
   });
 }
 
+function renderMarkers(rows){
+  const features = rows.map(p => new atlas.data.Feature(
+    new atlas.data.Point([p.lon, p.lat]),
+    { ...p, status: statusOf(p), selected: p.animal_id === selectedId }
+  ));
+  tigerSource.clear();
+  tigerSource.add(features);
+}
+
 function renderTrail(rows){
-  ensureLayers();
-  trailLayer.innerHTML = '';
+  pathSource.clear();
   if(rows.length < 2) return;
   let seg = [rows[0]], segIn = pointInBoundary(rows[0].lon, rows[0].lat);
   const segments = [];
@@ -412,30 +384,24 @@ function renderTrail(rows){
     if(inside !== segIn){ segments.push({pts:seg.slice(), inside:segIn}); seg=[rows[i]]; segIn=inside; }
   }
   segments.push({pts:seg, inside:segIn});
-  segments.forEach((s,idx)=>{
+  segments.forEach(s=>{
     if(s.pts.length < 2) return;
-    const d = s.pts.map((p,i)=>{
-      const [x,y]=project(p.lon,p.lat);
-      return (i===0?'M':'L') + x + ',' + y;
-    }).join(' ');
-    const isLast = idx === segments.length-1;
-    trailLayer.appendChild(svgEl_('path',{
-      d, fill:'none', stroke:'var(--accent)', 'stroke-width':2.2,
-      'stroke-dasharray': s.inside ? 'none' : '4,4',
-      'marker-end': isLast ? 'url(#arrowHead)' : ''
-    }));
+    const coords = s.pts.map(p=>[p.lon,p.lat]);
+    pathSource.add(new atlas.data.Feature(new atlas.data.LineString(coords), { inside: s.inside }));
   });
 }
 
-/* ============================================================
-   DEMO DATA - used until API_BASE is configured and reachable,
-   so the map and panels never sit empty
-   ============================================================ */
+// DEMO DATA - used until API_BASE is configured and reachable, so the map and panels never sit empty
 function demoPointInBoundary(){
-  const p = proj;
+  if(!boundaryRing) return [CONFIG.NAGARAHOLE_LON, CONFIG.NAGARAHOLE_LAT];
+  let minLon=Infinity,maxLon=-Infinity,minLat=Infinity,maxLat=-Infinity;
+  boundaryRing.forEach(([lon,lat])=>{
+    minLon=Math.min(minLon,lon); maxLon=Math.max(maxLon,lon);
+    minLat=Math.min(minLat,lat); maxLat=Math.max(maxLat,lat);
+  });
   for(let i=0;i<200;i++){
-    const lon = p.minLon + Math.random()*(p.maxLon-p.minLon);
-    const lat = p.minLat + Math.random()*(p.maxLat-p.minLat);
+    const lon = minLon + Math.random()*(maxLon-minLon);
+    const lat = minLat + Math.random()*(maxLat-minLat);
     if(pointInBoundary(lon,lat)) return [lon,lat];
   }
   return [CONFIG.NAGARAHOLE_LON, CONFIG.NAGARAHOLE_LAT];
@@ -483,9 +449,7 @@ function genDemoTrend(){
   return rows;
 }
 
-/* ============================================================
-   DATA FETCH (with demo fallback)
-   ============================================================ */
+// DATA FETCH (with demo fallback)
 let currentPositions = [];
 
 async function fetchPositions(){
@@ -493,7 +457,8 @@ async function fetchPositions(){
     try{
       const res = await fetch(`${CONFIG.API_BASE}/positions`);
       if(res.ok) return await res.json();
-    }catch(e){ /* fall through to demo */ }
+    }catch(e){ // fall through to demo
+    }
   }
   return genDemoPositions(CONFIG.DEMO_COUNT);
 }
@@ -502,7 +467,8 @@ async function fetchHistory(animalId, lat, lon){
     try{
       const res = await fetch(`${CONFIG.API_BASE}/history?animal_id=${encodeURIComponent(animalId)}`);
       if(res.ok){ const rows = await res.json(); if(rows.length) return rows; }
-    }catch(e){ /* fall through */ }
+    }catch(e){ // fall through
+    }
   }
   return genDemoHistory(animalId, lat, lon);
 }
@@ -525,9 +491,7 @@ async function fetchTrend(){
   return genDemoTrend();
 }
 
-/* ============================================================
-   MAIN POLL LOOP
-   ============================================================ */
+// MAIN POLL LOOP
 let lastUpdate = Date.now();
 async function pollPositions(){
   const rows = await fetchPositions();
@@ -570,9 +534,7 @@ document.getElementById('pollRate').addEventListener('change', (e)=>{
   window.__pollTimer = setInterval(pollPositions, Number(e.target.value));
 });
 
-/* ============================================================
-   TIGER CLICK -> sidebar takeover + trail
-   ============================================================ */
+// TIGER CLICK -> sidebar takeover + trail
 const overviewPanel = document.getElementById('overviewPanel');
 const tigerInfo = document.getElementById('tigerInfo');
 
@@ -603,16 +565,14 @@ document.getElementById('backBtn').addEventListener('click', ()=>{
   selectedId = null;
   overviewPanel.style.display = '';
   tigerInfo.classList.remove('active');
-  trailLayer.innerHTML = '';
+  pathSource.clear();
   renderMarkers(currentPositions);
 });
 
-/* ============================================================
-   WEATHER
-   ============================================================ */
+// WEATHER
 let weatherLat = CONFIG.NAGARAHOLE_LAT, weatherLon = CONFIG.NAGARAHOLE_LON;
 function setWeatherCoordsFromBoundary(ring){
-  // average of the ring's points (minus the closing duplicate) — good enough
+  // average of the ring's points (minus the closing duplicate) - good enough
   // center for weather purposes, and pulled from the real geojson rather
   // than a guessed constant
   const pts = ring.slice(0, ring.length - 1);
@@ -636,7 +596,8 @@ async function loadWeather(){
     document.getElementById('wRain').textContent = c.precipitation + ' mm';
     document.getElementById('wHum').textContent = c.relative_humidity_2m + '%';
     document.getElementById('wTime').textContent = new Date().toLocaleTimeString();
-  }catch(e){ /* keep the baseline values already shown */ }
+  }catch(e){ // keep the baseline values already shown
+  }
 }
 function weatherText(code){
   const m = {0:'clear sky',1:'mostly clear',2:'partly cloudy',3:'overcast',45:'fog',48:'fog',
@@ -652,9 +613,7 @@ function weatherEmoji(code){
 }
 setInterval(loadWeather, 10*60*1000);
 
-/* ============================================================
-   MODALS (deep-dive charts live here, not on the main screen)
-   ============================================================ */
+// MODALS (deep-dive charts live here, not on the main screen)
 Chart.defaults.font.family = "'Inter', sans-serif";
 const backdrop = document.getElementById('modalBackdrop');
 const modalTitle = document.getElementById('modalTitle');
@@ -719,21 +678,10 @@ async function updateActivityLine(alertRows){
   }
 }
 
-/* ============================================================
-   INIT
-   ============================================================ */
+// INIT
 async function init(){
-  try{
-    const res = await fetch(CONFIG.GEOJSON_PATH);
-    const gj = await res.json();
-    boundaryRing = gj.features[0].geometry.coordinates[0];
-    setWeatherCoordsFromBoundary(boundaryRing);
-  }catch(e){
-    boundaryRing = fallbackBoundaryRing();
-    // geojson didn't load, so weatherLat/weatherLon stay at the CONFIG fallback
-  }
-  proj = computeProjection(boundaryRing);
-  drawBoundary(boundaryRing);
+  initAzureMap();
+  await mapReady; // boundary + weather-coord setup happens inside the map's 'ready' handler
   loadWeather();
   await pollPositions();
   updateActivityLine();
