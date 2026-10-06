@@ -23,7 +23,7 @@ variable "monthly_budget_usd" {
 }
 
 variable "budget_start_date" {
-  default = "2026-10-05T00:00:00Z"   #first day of current month, UTC
+  default = "2026-10-01T00:00:00Z"   #first day of current month, UTC
 }
 
 variable "alert_email" {
