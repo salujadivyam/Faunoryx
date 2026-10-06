@@ -3,7 +3,7 @@ variable "resource_group_name" {
 }
 
 variable "location" {
-  default = "Malaysia West"
+  default="Central India"
 }
 
 variable "eventhub_namespace_name" {

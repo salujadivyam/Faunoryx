@@ -8,7 +8,11 @@ terraform{
     }
 }
 provider "azurerm"{
-    features{}
+    features{
+      resource_group {
+        prevent_deletion_if_contains_resources = false
+      }
+    }
 }
 resource "azurerm_resource_group" "rg"{
     name=var.resource_group_name
@@ -117,14 +121,14 @@ resource "azurerm_storage_account" "faunostore" {
 resource "azurerm_service_plan" "faunoservice" {
   name="faunofuncservice"
   resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
+  location            = var.location
   os_type             = "Linux"
   sku_name            = "Y1"
 }
 
 resource "azurerm_linux_function_app" "faunofunc" {
-  name="alert-function-app"
-  location=azurerm_resource_group.rg.location
+  name="faunoryx-alert-func"
+  location=var.location
   resource_group_name=azurerm_resource_group.rg.name
   service_plan_id=azurerm_service_plan.faunoservice.id
   storage_account_name=azurerm_storage_account.faunostore.name
@@ -174,7 +178,7 @@ resource "azurerm_monitor_metric_alert" "azure_monitor"{
 resource "azurerm_maps_account" "maps"{
   name="faunomap"
   resource_group_name=azurerm_resource_group.rg.name
-  location=azurerm_resource_group.rg.location
+  location="global"
   sku_name="G2"
   
 }
