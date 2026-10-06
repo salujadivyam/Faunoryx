@@ -224,8 +224,8 @@
 <script>
 // CONFIG
 const CONFIG = {
-  AZURE_MAPS_KEY: "YOUR_AZURE_MAPS_KEY",
-  API_BASE: "https://YOUR-FUNCTION-APP.azurewebsites.net/api",
+  AZURE_MAPS_KEY:"maps key(i won't reveal my maps key here)",
+  API_BASE:"https://faunoryx-alert-func.azurewebsites.net/api",
   GEOJSON_PATH: "Nagarahole Map.geojson",
   NAGARAHOLE_LAT: 12.00,
   NAGARAHOLE_LON: 76.15,
@@ -614,7 +614,9 @@ function weatherEmoji(code){
 setInterval(loadWeather, 10*60*1000);
 
 // MODALS (deep-dive charts live here, not on the main screen)
-Chart.defaults.font.family = "'Inter', sans-serif";
+if (typeof Chart !== 'undefined') {
+  Chart.defaults.font.family = "'Inter', sans-serif";
+}
 const backdrop = document.getElementById('modalBackdrop');
 const modalTitle = document.getElementById('modalTitle');
 const modalBody = document.getElementById('modalBody');

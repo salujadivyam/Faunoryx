@@ -137,6 +137,9 @@ resource "azurerm_linux_function_app" "faunofunc" {
     application_stack{
       python_version="3.11"
     }
+    cors {
+    allowed_origins = ["*"]
+    }
   }
   app_settings={
     "sql_server"=azurerm_mssql_server.sql_server.fully_qualified_domain_name
