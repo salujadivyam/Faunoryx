@@ -10,6 +10,7 @@ from azure.eventhub import EventData
 import os
 from dotenv import load_dotenv
 
+print("Script Running, no errors ")
 load_dotenv()
 geojson=r"Nagarahole Map.geojson"       #using a relative path
 conn_str=os.environ["conn_str"]
