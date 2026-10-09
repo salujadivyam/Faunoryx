@@ -148,7 +148,7 @@ def recent_anomalies(req:fn.HttpRequest)->fn.HttpResponse:
 
     try:
         conn=get_connection()
-        cursor=conn.curor()
+        cursor=conn.cursor()
         cursor.execute("""SELECT TOP 20 animal_id,timestamp,lat,lon,anomaly_type FROM MovementAnomalies ORDER BY timestamp DESC""")
         rows=cursor.fetchall()
         res=[]
