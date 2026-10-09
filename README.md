@@ -4,7 +4,7 @@ Faunoryx is a simulated live tracking system for 149 tigers in Nagarahole Tiger 
 
 A Python script moves the tigers around inside the real reserve boundary and sends their GPS pings to Azure Event Hubs. A second script reads those pings and saves them in Azure SQL. Azure Functions serve the data as an API, and a dashboard built on Azure Maps shows where every tiger is, how it is behaving and where it has been.
 
-![Dashboard overview](docs/images/01-dashboard-overview.png)
+![Dashboard overview](terraform/docs/images/01-dashboard-overview.png)
 
 ## Contents
 
@@ -26,7 +26,7 @@ A Python script moves the tigers around inside the real reserve boundary and sen
 
 ## How it fits together
 
-![Architecture](docs/images/02-architecture.png)
+![Architecture](terraform/docs/images/02-architecture.png)
 
 1. The simulator creates one GPS ping per tiger on every tick and sends it to Event Hubs.
 2. Event Hubs holds the stream until something reads it.
@@ -138,7 +138,7 @@ Timestamps are in UTC. The key in the ping is `speedkmph` without an underscore.
 
 One `terraform apply` creates everything and one `terraform destroy` removes it.
 
-![Resources in the Azure portal](docs/images/03-azure-resources.png)
+![Resources in the Azure portal](terraform/docs/images/03-azure-resources.png)
 
 ### main.tf
 
@@ -233,7 +233,7 @@ CREATE TABLE MovementAnomalies(
 
 Here is what `/api/positions` returns. Normal tigers move well under 1 km/h while the two sustained-fast tigers at the top of the list are at 50 and 38 km/h and are flagged.
 
-![API response](docs/images/04-api-response.png)
+![API response](terraform/docs/images/04-api-response.png)
 
 The browser calls the API from another origin, so CORS has to be switched on:
 
@@ -282,7 +282,7 @@ Click any pin and the map narrows down to that tiger.
 4. The left panel shows the tiger's ID, status, speed, behaviour, flags and last update.
 5. The back link brings every pin back and returns to the earlier view.
 
-![Focus mode](docs/images/05-focus-mode.png)
+![Focus mode](terraform/docs/images/05-focus-mode.png)
 
 ### How the dashboard reads the API
 
@@ -296,9 +296,9 @@ Weather comes from Open-Meteo, a free service that needs no API key. The page ca
 
 The switch in the header changes both the page and the map style.
 
-![Light theme](docs/images/06-light-theme.png)
+![Light theme](terraform/docs/images/06-light-theme.png)
 
-![Dark theme](docs/images/07-dark-theme.png)
+![Dark theme](terraform/docs/images/07-dark-theme.png)
 
 ## Running it
 
