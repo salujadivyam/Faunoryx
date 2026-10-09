@@ -18,12 +18,12 @@ variable "sku" {
   default = "Basic"
 }
 
-variable "monthly_budget_usd" {
-  default = 30
+variable "monthly_budget" {
+  default = 1000
 }
 
 variable "budget_start_date" {
-  default = "2026-10-01T00:00:00Z"   #first day of current month, UTC
+  default = "2026-11-01T00:00:00Z"   #first day of current month, UTC
 }
 
 variable "alert_email" {

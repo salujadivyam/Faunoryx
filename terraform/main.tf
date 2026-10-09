@@ -55,7 +55,7 @@ resource "azurerm_eventhub_authorization_rule" "listen"{
 resource "azurerm_consumption_budget_resource_group" "budget" {
   name="faunoryx-budget"
   resource_group_id=azurerm_resource_group.rg.id
-  amount=var.monthly_budget_usd
+  amount=var.monthly_budget
   time_grain="Monthly"
 
   time_period {
@@ -64,14 +64,20 @@ resource "azurerm_consumption_budget_resource_group" "budget" {
 
   notification {
     enabled=true
-    threshold=80.0
+    threshold=50
     operator="GreaterThan"
     contact_emails=[var.alert_email]
   }
 
   notification {
     enabled=true
-    threshold=100.0
+    threshold=80
+    operator="GreaterThan"
+    contact_emails=[var.alert_email]
+  }
+  notification {
+    enabled=true
+    threshold=100
     operator="GreaterThan"
     contact_emails=[var.alert_email]
   }
